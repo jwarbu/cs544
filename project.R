@@ -40,6 +40,9 @@ s2017$Gender[s2017$Gender=="agender" | s2017$Gender== "genderqueer" | s2017$Gend
 
 s2017 #4,790 x 35 extra 10 variables due to 2017 survey job interest Q split up
 gender.pop<-table(s2017$Gender)
+age.pop<-table(s2017$Age)
+barplot(gender.pop, main = "Gender Distribution")
+barplot(age.pop, main = "Age Distribution")
 
 
 
@@ -219,6 +222,25 @@ ExpectedByAge <- s2017 %>%
   select(Age, ExpectedEarning) %>%
   filter(!is.na(Age), !is.na(ExpectedEarning))
 ExpectedByAge
+  
+## Scatter Plots
+
+# Income by age
+plot.income_by_age <- ggplot(IncomeByAge, aes(
+  x=IncomeByAge$Age, y=(IncomeByAge$Income/1000))) +
+  geom_point() + ylab("Last Year's Income (per $1k)") +
+  xlab("Age") + ggtitle("Current Income by age")
+plot.income_by_age
+
+# Expected earning by age
+plot.expected_earn_by_age <- ggplot(ExpectedByAge, aes(
+  x=ExpectedByAge$Age, y=(ExpectedByAge$ExpectedEarning/1000)
+)) +
+  geom_point() + ylab("Expected Earning at first Developer job") +
+  xlab("Age") + ggtitle("Expected Earnings at \nfirst developer role by age")
+plot.expected_earn_by_age
+
+boxplot(table(IncomeByAge))
 
 
 ## Summary data
@@ -231,19 +253,3 @@ ExpectedByAge.summary
 IncomeByAge.summary <- IncomeByAge %>%
   group_by(Age) %>%
   summarise_all(funs(mean))
-  
-IncomeByAge
-plot.income_by_age <- ggplot(IncomeByAge, aes(
-  x=IncomeByAge$Age, y=(IncomeByAge$Income/1000))) +
-  geom_point() + ylab("Last Year's Income (per $1k)") +
-  xlab("Age")
-plot.income_by_age
-
-plot.expected_earn_by_age <- ggplot(IncomeByAge, aes(
-  x=IncomeByAge$Age, y=(IncomeByAge$ExpectedEarning/1000)
-)) +
-  geom_point() + ylab("Expected Earning at first Developer job") +
-  xlab("Age")
-plot.expected_earn_by_age
-
-boxplot(table(IncomeByAge))
