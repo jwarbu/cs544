@@ -211,13 +211,24 @@ plot_grid(plot.gamedev,
 ####
 
 IncomeByAge <- s2017 %>%
-  select(Age, Income, ExpectedEarning) %>%
-  filter(!is.na(Age), !is.na(Income), !is.na(ExpectedEarning))
+  select(Age, Income) %>%
+  filter(!is.na(Age), !is.na(Income))
 IncomeByAge
 
+ExpectedByAge <- s2017 %>%
+  select(Age, ExpectedEarning) %>%
+  filter(!is.na(Age), !is.na(ExpectedEarning))
+ExpectedByAge
 
-## only want those that have a value for all three
-IncomeByAge.avg_expectations <- IncomeByAge %>%
+
+## Summary data
+ExpectedByAge.summary <- ExpectedByAge %>%
+  select(Age, ExpectedEarning) %>%
+  group_by(Age) %>%
+  summarise_all(funs(mean))
+ExpectedByAge.summary
+
+IncomeByAge.summary <- IncomeByAge %>%
   group_by(Age) %>%
   summarise_all(funs(mean))
   
@@ -227,4 +238,12 @@ plot.income_by_age <- ggplot(IncomeByAge, aes(
   geom_point() + ylab("Last Year's Income (per $1k)") +
   xlab("Age")
 plot.income_by_age
-IncomeByAge$Income
+
+plot.expected_earn_by_age <- ggplot(IncomeByAge, aes(
+  x=IncomeByAge$Age, y=(IncomeByAge$ExpectedEarning/1000)
+)) +
+  geom_point() + ylab("Expected Earning at first Developer job") +
+  xlab("Age")
+plot.expected_earn_by_age
+
+boxplot(table(IncomeByAge))
