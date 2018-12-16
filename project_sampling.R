@@ -3,9 +3,7 @@ library(cowplot)
 library(sampling)
 library(stats)
 library(tidyverse)  
-library(riverplot)
 library(ggplot2)
-library(ggmosaic)
 
 #####
 # Set directory and import data
@@ -25,15 +23,38 @@ s2017 <- read.csv(file = "2017-fCC-New-Coders-Survey-Data.csv",
 table(s2017$Gender) #before
 s2017$Gender[s2017$Gender=="agender" | s2017$Gender== "genderqueer" | s2017$Gender=="trans"] <- "non-binary/genderqueer"
 
-# some responses are EXTREME outliers that skew graphs visually. I will be be excluding all expected earnings above 250k and current Income about 300k
+# some responses are EXTREME outliers that skew graphs visually. 
+ExpectedByAge <- s2017 %>%
+  select(Age, ExpectedEarning) %>%
+  filter(!is.na(Age), !is.na(ExpectedEarning))
+ExpectedByAge
+
+# Expected earning by age
+plot.expected_earn_by_age <- ggplot(ExpectedByAge, aes(
+  x=ExpectedByAge$Age, y=(ExpectedByAge$ExpectedEarning/1000)
+)) +
+  geom_point() + ylab("Expected Earning at first Developer job") +
+  xlab("Age") + ggtitle("Expected Earnings at \nfirst developer role by age")
+plot.expected_earn_by_age
+
+#summary
+ExpectedByAge.summary <- ExpectedByAge %>%
+  select(Age, ExpectedEarning) %>%
+  group_by(Age) %>%
+  summarise_all(funs(mean))
+ExpectedByAge.summary
+
+
+# Because of the above visuals, I will be excluding expected earnings above 250k
+
 length(s2017$Gender) # 18175
 s2017 <- s2017 %>%
-  select(Gender, Income, ExpectedEarning) %>%
   filter(!is.na(Gender), !is.na(Income), !is.na(ExpectedEarning), 
-         ExpectedEarning < 250000) 
+         ExpectedEarning < 250000, 
+         CountryLive == "United States of America", 
+         IsSoftwareDev == 0) %>%
+  select(Gender, Income, ExpectedEarning)
   
-
-
 #####
 # Sampling by Gender
 #####
@@ -82,18 +103,26 @@ sample3 <- s2017[st.1$ID_unit,]
 
 
 #Distributions
-plot.gender_expected <- ggplot(s2017, aes(x=s2017$Gender, y=(s2017$ExpectedEarning/1000)))+
-  geom_point()
+plot.gender_expected <- ggplot(s2017, aes(x=s2017$Gender, 
+                                          y=(s2017$ExpectedEarning/1000)))+
+  geom_point() + ylab("per $1k") + xlab("Gender") +
+  ggtitle("Expected Earnings of entire \n Pop by Gender")
 
-plot.sample1 <- ggplot(sample1, aes(x=sample1$Gender, y=(sample1$ExpectedEarning/1000))) +
-  geom_point()
+plot.sample1 <- ggplot(sample1, aes(x=sample1$Gender, 
+                                    y=(sample1$ExpectedEarning/1000))) +
+  geom_point() + ylab("per $1k") + xlab("Gender") +
+  ggtitle("Expected Earnings of sample1 \n by Gender")
 sample1
 
-plot.sample2 <- ggplot(sample2, aes(x=sample2$Gender, y=(sample2$ExpectedEarning/1000))) + 
-  geom_point()
+plot.sample2 <- ggplot(sample2, aes(x=sample2$Gender, 
+                                    y=(sample2$ExpectedEarning/1000))) + 
+  geom_point() + ylab("per $1k") + xlab("Gender") +
+  ggtitle("Expected Earnings of sample2 \nby Gender")
 
-plot.sample3 <- ggplot(sample3, aes(x=sample3$Gender, y=(sample3$ExpectedEarning/1000))) + 
-  geom_point()
+plot.sample3 <- ggplot(sample3, aes(x=sample3$Gender, 
+                                    y=(sample3$ExpectedEarning/1000))) + 
+  geom_point() + ylab("per $1k") + xlab("Gender") +
+  ggtitle("Expected Earnings of sample3 \nby Gender")
 
 s2017.summary <- s2017 %>%
   group_by(Gender) %>%
@@ -114,5 +143,9 @@ sample3.summary <- sample3 %>%
   group_by(Gender) %>%
   summarise_all(funs(mean))
 sample3.summary
+
+plot_grid(plot.gender_expected, plot.sample1, plot.sample2,
+          plot.sample3, 
+          labels="AUTO", ncol = 2, align = 'v')
 
 

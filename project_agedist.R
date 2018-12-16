@@ -3,9 +3,7 @@ library(cowplot)
 library(sampling)
 library(stats)
 library(tidyverse)  
-library(riverplot)
 library(ggplot2)
-library(ggmosaic)
 #install.packages("ggmosaic")
 setwd("/Users/jenniferwartick/Documents/Boston University/cs544 Found Analytics/Project/clean-data")  # Change this to your path
 s2017 <- read.csv(file = "2017-fCC-New-Coders-Survey-Data.csv",
@@ -17,11 +15,10 @@ s2017 <- read.csv(file = "2017-fCC-New-Coders-Survey-Data.csv",
 # only select columns of interest
 
 s2017 <- s2017 %>%
+  filter(CountryLive == "United States of America", 
+         IsSoftwareDev == 0, !is.na(Age) )%>%
   select(Age)
 
-
-# Get rid of NAs
-s2017 <- filter(s2017,!is.na(Age) )
 
 par(mfrow=c(1,2))
 age.pop<-table(s2017$Age)
@@ -29,7 +26,7 @@ age.pop<-table(s2017$Age)
 # barplot of distribution
 barplot(age.pop, main = "Age Distribution", 
         ylab="# of respondents", xlab="Age (years)",
-        ylim = c(0,1000))
+        ylim = c(0,300))
 
 # density histogram
 hist(s2017$Age, prob = TRUE, main = "Density of Ages",
